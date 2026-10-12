@@ -287,19 +287,16 @@
           return res.json();
         })
         .then(data => {
-          // --- SERVIDOR ACTIVO (ONLINE) ---
           actualizarEstadoOnline();
           document.getElementById('pac-banner').style.display = 'none';
           document.getElementById('dot-icecast').className = 'blinker-on';
           document.getElementById('dot-l2mr').className = 'blinker-on';
 
-          // Actualiza números simulados
           actualIcecast = obtenerNumeroSimulado(actualIcecast, 50, 120);
           actualL2MR = obtenerNumeroSimulado(actualL2MR, 60, 150);
           document.getElementById('oyentes-icecast').innerText = actualIcecast;
           document.getElementById('oyentes-l2mr').innerText = actualL2MR;
 
-          // Extrae el título de la canción
           if (data && data.icestats && data.icestats.source) {
             const sources = data.icestats.source;
             const sourceArray = Array.isArray(sources) ? sources : [sources];
@@ -318,7 +315,6 @@
           }
         })
         .catch(err => {
-          // --- FUERA DE SERVICIO (PAC) ---
           actualizarEstadoPAC();
           document.getElementById('pac-banner').style.display = 'flex';
           document.getElementById('dot-icecast').className = 'blinker-off';
@@ -328,16 +324,16 @@
         });
     }
 
-    // Ejecuta inmediatamente y programa el intervalo
     verificarYActualizar();
     setInterval(verificarYActualizar, 10000);
   </script>
 
-  <!-- REGISTRO DEL SERVICE WORKER PARA LA PWA -->
+  <!-- REGISTRO DEL SERVICE WORKER CON RUTA ABSOLUTA -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js');
+        navigator.serviceWorker.register('/libreplay-pwa/sw.js')
+          .catch(err => console.log('SW error:', err));
       });
     }
   </script>
