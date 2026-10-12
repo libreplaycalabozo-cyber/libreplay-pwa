@@ -1,4 +1,5 @@
-// Service Worker para LibrePlay Radio Online
+// Service Worker Minimalista para LibrePlay PWA
 self.addEventListener('fetch', function(event) {
-  // Permite el tráfico normal de audio y datos
+  // Pasa todas las peticiones directamente a internet sin bloquear el streaming
+  event.respondWith(fetch(event.request));
 });
