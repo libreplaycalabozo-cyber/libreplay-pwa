@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LibrePlay Radio Online</title>
+  
+  <!-- Enlaces PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00aaff">
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 15px;
+      background-color: #0a0a0a;
+      color: #ffffff;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      text-align: center;
+    }
+
+    /* REPRODUCTOR VISUAL */
+    .player-card {
+      background: linear-gradient(135deg, #111a2e 0%, #0a0a0a 100%);
+      padding: 25px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+      border-top: 5px solid #00aaff;
+      max-width: 450px;
+      margin: 10px auto 25px auto;
+      border-left: 1px solid #222;
+      border-right: 1px solid #222;
+      border-bottom: 1px solid #222;
+    }
+
+    .player-title {
+      color: #ffffff;
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .player-title span {
+      color: #00aaff;
+    }
+
+    .player-slogan {
+      color: #aaaaaa;
+      margin: 5px 0 15px 0;
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    .now-playing-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #222;
+    }
+
+    .now-playing-label {
+      display: block;
+      font-size: 11px;
+      color: #00aaff;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    #song-title {
+      font-size: 15px;
+      color: #ffffff;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    .audio-container {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #333;
+    }
+
+    audio {
+      width: 100%;
+    }
+
+    /* WIDGET OYENTES Y PAC */
+    .main-card {
+      display: inline-block;
+      background-color: rgba(18, 18, 18, 0.95);
+      padding: 12px 18px;
+      border-radius: 16px;
+      border: 1px solid #222;
+      box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.6);
+      max-width: 450px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .title {
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-bottom: 1px solid #222222;
+      padding-bottom: 6px;
+    }
+
+    .title-icon { color: #00aaff; }
+
+    .buttons-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .widget-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #000000;
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid #252525;
+    }
+
+    .blinker-on {
+      height: 9px;
+      width: 9px;
+      background-color: #00ff66;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px #00ff66;
+      animation: blink 1.5s linear infinite;
+    }
+
+    .blinker-off {
+      height: 9px;
+      width: 9px;
+      background-color: #ffaa00;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: bold;
+      color: #e0e0e0;
+    }
+
+    .count {
+      font-size: 14px;
+      color: #00aaff;
+      font-weight: bold;
+    }
+
+    .unit {
+      font-size: 11px;
+      color: #aaaaaa;
+    }
+
+    .pac-banner {
+      display: none;
+      margin-top: 10px;
+      background-color: rgba(255, 170, 0, 0.15);
+      color: #ffcc00;
+      border: 1px solid #ffaa00;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0.2; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- REPRODUCTOR PRINCIPAL -->
+  <div class="player-card"> 
+    <div style="margin-bottom: 10px;"> 
+      <span id="status-dot" style="height: 10px; width: 10px; background-color: #4caf50; border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 8px #4caf50;"></span> 
+      <span id="status-text" style="color: #4caf50; font-weight: bold; font-size: 12px;">EN VIVO</span> 
+    </div> 
+    <h1 class="player-title">Radio <span>LibrePlay</span></h1> 
+    <p class="player-slogan">La nueva forma de escuchar radio</p> 
+    
+    <div class="now-playing-box"> 
+      <span class="now-playing-label">Estás escuchando:</span> 
+      <div id="song-title">Cargando información...</div> 
+    </div> 
+    
+    <div class="audio-container"> 
+      <audio id="radioplayer" controls> 
+        <source src="https://stream.libreplaycalabozo.lat/libreplay" type="audio/mpeg"> 
+        Tu navegador no soporta este reproductor de audio.
+      </audio> 
+    </div> 
+  </div>
+
+  <!-- WIDGET DE OYENTES SIMULADOS -->
+  <div class="main-card">
+    <div class="title">
+      <span class="title-icon">🎧</span> Oyentes LibrePlay Radio Online
+    </div>
+
+    <div class="buttons-container">
+      <div class="widget-box">
+        <span id="dot-icecast" class="blinker-on"></span>
+        <span class="label">Google Site:</span>
+        <span id="oyentes-icecast" class="count">0</span>
+        <span class="unit">oyentes</span>
+      </div>
+
+      <div class="widget-box">
+        <span id="dot-l2mr" class="blinker-on"></span>
+        <span class="label">LISTEN2MYRADIO:</span>
+        <span id="oyentes-l2mr" class="count">0</span>
+        <span class="unit">oyentes</span>
+      </div>
+    </div>
+
+    <div id="pac-banner" class="pac-banner">
+      ⚠️ FUERA DE AIRE POR PAC
+    </div>
+  </div>
+
+  <!-- SCRIPT DE MONITOREO Y METADATOS -->
+  <script>
+    const ICECAST_SERVER = "https://stream.libreplaycalabozo.lat"; 
+    const statsUrl = `${ICECAST_SERVER}/status-json.xsl`;
+
+    let actualIcecast = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
+    let actualL2MR = Math.floor(Math.random() * (150 - 60 + 1)) + 60;
+
+    function obtenerNumeroSimulado(valorActual, min, max) {
+      const variacion = Math.floor(Math.random() * 11) - 5; 
+      let nuevoValor = valorActual + variacion;
+      if (nuevoValor < min) nuevoValor = min + Math.floor(Math.random() * 5);
+      if (nuevoValor > max) nuevoValor = max - Math.floor(Math.random() * 5);
+      return nuevoValor;
+    }
+
+    function actualizarEstadoOnline() {
+      const dot = document.getElementById("status-dot");
+      const txt = document.getElementById("status-text");
+      dot.style.backgroundColor = "#4caf50";
+      dot.style.boxShadow = "0 0 8px #4caf50";
+      txt.style.color = "#4caf50";
+      txt.innerText = "EN VIVO";
+    }
+
+    function actualizarEstadoPAC() {
+      const dot = document.getElementById("status-dot");
+      const txt = document.getElementById("status-text");
+      dot.style.backgroundColor = "#f44336";
+      dot.style.boxShadow = "0 0 8px #f44336";
+      txt.style.color = "#f44336";
+      txt.innerText = "FUERA POR PAC";
+      document.getElementById("song-title").innerText = "Transmisión detenida";
+    }
+
+    function verificarYActualizar() {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+      fetch(statsUrl, { signal: controller.signal })
+        .then(res => {
+          clearTimeout(timeoutId);
+          if (!res.ok) throw new Error('Offline');
+          return res.json();
+        })
+        .then(data => {
+          // --- SERVIDOR ACTIVO (ONLINE) ---
+          actualizarEstadoOnline();
+          document.getElementById('pac-banner').style.display = 'none';
+          document.getElementById('dot-icecast').className = 'blinker-on';
+          document.getElementById('dot-l2mr').className = 'blinker-on';
+
+          // Actualiza números simulados
+          actualIcecast = obtenerNumeroSimulado(actualIcecast, 50, 120);
+          actualL2MR = obtenerNumeroSimulado(actualL2MR, 60, 150);
+          document.getElementById('oyentes-icecast').innerText = actualIcecast;
+          document.getElementById('oyentes-l2mr').innerText = actualL2MR;
+
+          // Extrae el título de la canción
+          if (data && data.icestats && data.icestats.source) {
+            const sources = data.icestats.source;
+            const sourceArray = Array.isArray(sources) ? sources : [sources];
+            const mySource = sourceArray.find(src => {
+              const mount = src.mount || src.listenurl || "";
+              return mount.includes('/libreplay');
+            });
+
+            if (mySource && (mySource.title || mySource.artist)) {
+              const artist = mySource.artist ? mySource.artist + " - " : "";
+              const title = mySource.title || "Música en vivo";
+              document.getElementById("song-title").innerText = artist + title;
+            } else {
+              document.getElementById("song-title").innerText = "Radio LibrePlay - En Vivo";
+            }
+          }
+        })
+        .catch(err => {
+          // --- FUERA DE SERVICIO (PAC) ---
+          actualizarEstadoPAC();
+          document.getElementById('pac-banner').style.display = 'flex';
+          document.getElementById('dot-icecast').className = 'blinker-off';
+          document.getElementById('dot-l2mr').className = 'blinker-off';
+          document.getElementById('oyentes-icecast').innerText = '0';
+          document.getElementById('oyentes-l2mr').innerText = '0';
+        });
+    }
+
+    // Ejecuta inmediatamente y programa el intervalo
+    verificarYActualizar();
+    setInterval(verificarYActualizar, 10000);
+  </script>
+
+  <!-- REGISTRO DEL SERVICE WORKER PARA LA PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+      });
+    }
+  </script>
+</body>
+</html>
