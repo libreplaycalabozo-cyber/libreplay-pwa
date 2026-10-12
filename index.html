@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LibrePlay Radio Online</title>
   
-  <!-- Enlaces PWA -->
+  <!-- Enlace al Manifest -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#00aaff">
   
@@ -326,16 +326,6 @@
 
     verificarYActualizar();
     setInterval(verificarYActualizar, 10000);
-  </script>
-
-  <!-- REGISTRO DEL SERVICE WORKER CON RUTA ABSOLUTA -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/libreplay-pwa/sw.js')
-          .catch(err => console.log('SW error:', err));
-      });
-    }
   </script>
 </body>
 </html>
