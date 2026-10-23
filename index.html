@@ -9,6 +9,12 @@
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#00aaff">
   
+  <!-- Soporte de instalación para iOS (Safari) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LibrePlay">
+  <link rel="apple-touch-icon" href="./icono-192.png">
+
   <style>
     body {
       margin: 0;
@@ -51,6 +57,112 @@
       font-style: italic;
     }
 
+    /* ESTILOS DEL TOCADISCOS Y VINILO */
+    .turntable-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 15px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .vinyl-disc {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #0a0a0a 18%, #1a1a1a 20%, #0a0a0a 21%, #0a0a0a 30%, #222 31%, #0a0a0a 32%, #0a0a0a 50%, #222 51%, #0a0a0a 52%, #00aaff 53%, #0088cc 68%, #0a0a0a 69%);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.8), inset 0 0 8px rgba(255, 255, 255, 0.2);
+      position: absolute;
+      animation: spinVinyl 2.5s linear infinite;
+      animation-play-state: paused; /* Pausado por defecto */
+    }
+
+    /* Etiqueta del centro del disco */
+    .vinyl-disc::after {
+      content: "LibrePlay";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      background: #00aaff;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 8px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #ffffff;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    /* Brazo del reproductor */
+    .tonearm {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      width: 60px;
+      height: 90px;
+      border-right: 4px solid #cccccc;
+      border-bottom: 4px solid #cccccc;
+      border-border-bottom-right-radius: 20px;
+      transform-origin: top right;
+      transform: rotate(-30deg); /* Posición inicial (fuera del disco) */
+      transition: transform 0.6s ease-in-out;
+      z-index: 2;
+      filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.7));
+    }
+
+    /* Aguja en el extremo del brazo */
+    .tonearm::after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      left: -6px;
+      width: 12px;
+      height: 16px;
+      background: #ff4444;
+      border-radius: 2px;
+    }
+
+    /* Animación de giro */
+    @keyframes spinVinyl {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Estados cuando se reproduce el audio */
+    .playing .vinyl-disc {
+      animation-play-state: running;
+    }
+
+    .playing .tonearm {
+      transform: rotate(5deg); /* Se coloca sobre el disco */
+    }
+
+    /* BOTÓN CUSTOM DE PLAY/PAUSE */
+    .play-btn {
+      background: linear-gradient(135deg, #00aaff, #0066cc);
+      border: none;
+      color: #ffffff;
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 170, 255, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 10px;
+    }
+
+    .play-btn:active {
+      transform: scale(0.95);
+    }
+
     .now-playing-box {
       background: rgba(255, 255, 255, 0.05);
       padding: 10px;
@@ -72,17 +184,6 @@
       color: #ffffff;
       font-weight: bold;
       margin-top: 5px;
-    }
-
-    .audio-container {
-      background: rgba(0, 0, 0, 0.4);
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid #333;
-    }
-
-    audio {
-      width: 100%;
     }
 
     /* WIDGET OYENTES Y PAC */
@@ -193,7 +294,7 @@
 <body>
 
   <!-- REPRODUCTOR PRINCIPAL -->
-  <div class="player-card"> 
+  <div class="player-card" id="playerContainer"> 
     <div style="margin-bottom: 10px;"> 
       <span id="status-dot" style="height: 10px; width: 10px; background-color: #4caf50; border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 8px #4caf50;"></span> 
       <span id="status-text" style="color: #4caf50; font-weight: bold; font-size: 12px;">EN VIVO</span> 
@@ -201,16 +302,24 @@
     <h1 class="player-title">Radio <span>LibrePlay</span></h1> 
     <p class="player-slogan">La nueva forma de escuchar radio</p> 
     
+    <!-- EFECTO TOCADISCOS Y DISCO DE VINILO -->
+    <div class="turntable-container">
+      <div class="vinyl-disc"></div>
+      <div class="tonearm"></div>
+    </div>
+
     <div class="now-playing-box"> 
       <span class="now-playing-label">Estás escuchando:</span> 
       <div id="song-title">Cargando información...</div> 
     </div> 
     
+    <!-- REPRODUCTOR DE AUDIO Y BOTÓN -->
     <div class="audio-container"> 
-      <audio id="radioplayer" controls> 
+      <audio id="radioplayer"> 
         <source src="https://stream.libreplaycalabozo.lat/libreplay" type="audio/mpeg"> 
         Tu navegador no soporta este reproductor de audio.
       </audio> 
+      <button class="play-btn" id="playToggleBtn">▶ REPRODUCIR</button>
     </div> 
   </div>
 
@@ -241,13 +350,31 @@
     </div>
   </div>
 
-  <!-- SCRIPT DE MONITOREO Y METADATOS -->
+  <!-- SCRIPT DE MONITOREO, ANIMACIÓN Y METADATOS -->
   <script>
     const ICECAST_SERVER = "https://stream.libreplaycalabozo.lat"; 
     const statsUrl = `${ICECAST_SERVER}/status-json.xsl`;
 
+    const audio = document.getElementById("radioplayer");
+    const playBtn = document.getElementById("playToggleBtn");
+    const playerContainer = document.getElementById("playerContainer");
+
     let actualIcecast = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
     let actualL2MR = Math.floor(Math.random() * (150 - 60 + 1)) + 60;
+
+    // CONTROL DEL REPRODUCTOR Y DE LA ANIMACIÓN DEL VINILO
+    playBtn.addEventListener("click", () => {
+      if (audio.paused) {
+        audio.play().then(() => {
+          playerContainer.classList.add("playing");
+          playBtn.innerText = "❚❚ PAUSAR";
+        }).catch(err => console.log("Error al reproducir:", err));
+      } else {
+        audio.pause();
+        playerContainer.classList.remove("playing");
+        playBtn.innerText = "▶ REPRODUCIR";
+      }
+    });
 
     function obtenerNumeroSimulado(valorActual, min, max) {
       const variacion = Math.floor(Math.random() * 11) - 5; 
@@ -274,6 +401,11 @@
       txt.style.color = "#f44336";
       txt.innerText = "FUERA POR PAC";
       document.getElementById("song-title").innerText = "Transmisión detenida";
+      
+      // Detener audio y animación si entra en estado PAC
+      audio.pause();
+      playerContainer.classList.remove("playing");
+      playBtn.innerText = "▶ REPRODUCIR";
     }
 
     function verificarYActualizar() {
@@ -306,9 +438,22 @@
             });
 
             if (mySource && (mySource.title || mySource.artist)) {
-              const artist = mySource.artist ? mySource.artist + " - " : "";
+              const artist = mySource.artist ? mySource.artist : "LibrePlay Radio";
               const title = mySource.title || "Música en vivo";
-              document.getElementById("song-title").innerText = artist + title;
+              document.getElementById("song-title").innerText = artist + " - " + title;
+
+              // Integración con pantalla de bloqueo del teléfono
+              if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                  title: title,
+                  artist: artist,
+                  album: 'LibrePlay Radio Online',
+                  artwork: [
+                    { src: './icono-192.png', sizes: '192x192', type: 'image/png' },
+                    { src: './icono-512.png', sizes: '512x512', type: 'image/png' }
+                  ]
+                });
+              }
             } else {
               document.getElementById("song-title").innerText = "Radio LibrePlay - En Vivo";
             }
@@ -326,6 +471,15 @@
 
     verificarYActualizar();
     setInterval(verificarYActualizar, 10000);
+
+    // Registro de Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW registrado:', reg.scope))
+          .catch(err => console.error('Error SW:', err));
+      });
+    }
   </script>
 </body>
 </html>
