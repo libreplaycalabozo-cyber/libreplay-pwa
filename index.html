@@ -109,7 +109,7 @@
       height: 90px;
       border-right: 4px solid #cccccc;
       border-bottom: 4px solid #cccccc;
-      border-border-bottom-right-radius: 20px;
+      border-bottom-right-radius: 20px;
       transform-origin: top right;
       transform: rotate(-30deg); /* Posición inicial (fuera del disco) */
       transition: transform 0.6s ease-in-out;
@@ -442,7 +442,7 @@
               const title = mySource.title || "Música en vivo";
               document.getElementById("song-title").innerText = artist + " - " + title;
 
-              // Integración con pantalla de bloqueo del teléfono
+              // Integración de Media Session API para la pantalla de bloqueo
               if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                   title: title,
@@ -476,19 +476,10 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW registrado:', reg.scope))
-          .catch(err => console.error('Error SW:', err));
+          .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
+          .catch(err => console.error('Error al registrar el Service Worker:', err));
       });
     }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
-        .catch(err => console.error('Error al registrar el Service Worker:', err));
-    });
-  }
-</script>
 </body>
 </html>
